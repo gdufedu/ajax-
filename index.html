@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="Keywords" content="">
+		<meta name="Description" content="">
+		<title>ajax分页</title>
+		<link rel="stylesheet" href="css/AjaxPaging.css" />
+	</head>
+	<body>
+		<div class="wrap flex_column">
+			<div class="content flex_column">
+				<!-- <a href="http://mp.weixin.qq.com/s/hSI0RNGR23KetTFLoYP7dQ" class="items flex_row">
+					 <div class="img"><img src="http://www.tanzhouphp.com/tanzhoue/images/newsList/1.jpg" alt=""></div>
+					 <div class="bd">
+						 <p class="label">说来也是惨，古生物学家好像特别容易被假化石坑到呢……</p>
+					 </div>
+					 <div class="ft">&GT;</div>
+				 </a>-->
+			</div>
+			<div class="page">
+				<ul class="flex_row">
+					<li>1</li>
+					<li>2</li>
+					<li>3</li>
+					<li>4</li>
+					<li>5</li>
+					<li>6</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript" src="js/myAjax.js"></script>
+		<script type="text/javascript">
+		/*
+			从后台拿到数据 不可能是一下全部拿到.
+			一般对数据分页处理
+			页   每一个数据条数
+			page  limit 
+			2     10
+
+			从后台请求过来数据  这个渲染到页面上
+
+
+		*/
+			getData();
+			var goTo=cacheData();
+			function getData(page){
+				var page = page || 1;
+				var url="http://test.wulv5.com/api/v1_0/movie";
+				myAjax({
+					url:url,
+					data:{
+						page:page,
+						limit:5
+					},
+					success:function(doc){
+						var data=JSON.parse(doc);
+						goTo.set(page,data);
+						renderData(data);
+					}
+				});
+			}
+			var oLi=document.querySelectorAll(".flex_row li");
+			var oUl=document.querySelector('.flex_row');
+			oUl.addEventListener("click",function(e){
+				var e=e||window.event;
+				if(e.target.tagName.toLowerCase()==='li'){
+					goTo.get(e.target.innerText);
+				}	
+			});
+			function cacheData(){
+				var cache={};
+				return {
+					set:function(page,data){
+						cache[page]=data;
+					},
+					get:function(page){
+						if(page in cache){
+							renderData(cache[page]);
+						}else {
+							getData(page);
+						}
+						return cache[page];
+						
+					}
+				}
+			}
+			function renderData(data){
+				var str='';
+				data.forEach((dataDoc) => {
+					str+=`
+						<a href=${dataDoc.url} class="items flex_row">
+							<div class="img"><img src="${dataDoc.cover}"></div>
+							<div class="bd">
+								<p class="label">${dataDoc.title}</p>
+							</div>
+							<div class="ft">&GT;</div>
+						</a>
+					`;
+				});
+				document.querySelector(".content").innerHTML=str;
+			}
+		</script>
+	</body>
+</html>
